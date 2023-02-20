@@ -40,9 +40,26 @@ let ApiVersionSchema = {
    }
 }
 
+let ProductSchema = {
+  //id
+  name: 'Product',
+  primaryKey: 'name',
+  properties:{
+    name: 'string',
+    category: 'string',
+    marca: 'string',
+    capacidad: 'int',
+    quantity: 'int'
+  }
+}
+
+let ContractSchema = {
+  name: 'Contract'
+}
+
 // // // MODULE EXPORTS
 
-let config = {path: './data/blogs.realm', schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema]}
+let config = {path: './data/blogs.realm', schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema, ProductSchema]}
 
 exports.getDB = async () => await Realm.open(config)
 
@@ -56,7 +73,7 @@ if (process.argv[1] == __filename){ //TESTING PART
 
       let DB = new Realm({
         path: './data/blogs.realm',
-        schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema]
+        schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema, ProductSchema]
       })
      
       DB.write(() => {
@@ -73,18 +90,27 @@ if (process.argv[1] == __filename){ //TESTING PART
 
         let apiVersion = DB.create('Version', {name: 'version de la api', version: '0.0'})
 
-        console.log('Inserted objects', user, blog, post, apiVersion)
+        let product = DB.create('Product', {
+          name: 'Acer 26',
+          category: 'Ordenador',
+          marca: 'Acer',
+          capacidad: 16,
+          quantity: 10
+        })
+
+        console.log('Inserted objects', user, blog, post, apiVersion, product)
       })
       DB.close()
 
   }
   else { //consultar la BD
 
-      Realm.open({ path: './data/blogs.realm' , schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema] }).then(DB => {
+      Realm.open({ path: './data/blogs.realm' , schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema, ProductSchema] }).then(DB => {
         let users = DB.objects('User')
         users.forEach(x => console.log(x.name))
         let blog = DB.objectForPrimaryKey('Blog', 'Todo Motos')
         let apiVersion = DB.objects('Version', '0.0')
+        let product = DB.objects('Product')
         if (blog)
            console.log(blog.title, 'by', blog.creator.name)
         DB.close()

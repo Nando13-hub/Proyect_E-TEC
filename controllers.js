@@ -19,12 +19,15 @@ const schema = buildSchema(`
     searchBlog(q:String!):[Blog]
     posts(blogId:ID!):[Post]
     searchPost(blogId:ID!, q:String!):[Post]
+
+    products: [Product]
   }
   type Mutation {
     addUser(name:String!):User!
     addBlog(title:String!,creator:ID!):Blog!
     addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
   }
+
   type User{
 	name: String
   }
@@ -35,13 +38,23 @@ const schema = buildSchema(`
 	author: User
 	blog: Blog
   }
+
   type Blog{
 	creator: User
 	title: String
   }
 
   type Version{
+    name: String
     version: String
+  }
+
+  type Product{
+    name: String,
+    category: String,
+    marca: String,
+    capacidad: Int,
+    quantity: Int
   }
 `)
 
@@ -81,7 +94,9 @@ const rootValue = {
        return post
      },
      
-     apiVersion: () => DB.objects('Version')
+     apiVersion: () => DB.objects('Version'),
+     products: () => DB.objects('Product'),
+
 }
 
 exports.root   = rootValue
