@@ -19,13 +19,14 @@ const schema = buildSchema(`
     searchBlog(q:String!):[Blog]
     posts(blogId:ID!):[Post]
     searchPost(blogId:ID!, q:String!):[Post]
-
     products: [Product]
+    searchProducts(marca:String!):[Product]
   }
   type Mutation {
     addUser(name:String!):User!
     addBlog(title:String!,creator:ID!):Blog!
     addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
+    addProduct(name:String!, category:String!, marca: String!, capacidad: Int!, quantity: Int!):Product
   }
 
   type User{
@@ -96,7 +97,23 @@ const rootValue = {
      
      apiVersion: () => DB.objects('Version'),
      products: () => DB.objects('Product'),
-
+     searchProducts: ({ marca }) => {
+      marca = marca.toLowerCase()
+      return DB.objects('Product').filter(x => x.marca.toLowerCase().includes(marca))
+    },
+     addProduct: ({name, category, marca, capacidad, quantity}) => {
+      let data = {
+        name: name,
+        category: category,
+        marca: marca,
+        capacidad: capacidad,
+        quantity: quantity
+      }
+      DB.write( () => {post = DB.create('Product', data)})
+      // SSE notification
+      sse.emitter.emit('new-post', data)
+      return data
+     }
 }
 
 exports.root   = rootValue
