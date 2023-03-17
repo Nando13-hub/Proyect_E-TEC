@@ -43,8 +43,8 @@
            <b-button @click="" size="sm">Crear Usuario</b-button>
         </b-alert>
       
-        <b-form-group horizontal :label-cols="4" label="Dime un tema">
-          <b-form-input v-model.trim="query" placeholder="... por ejemplo moto" 
+        <b-form-group horizontal :label-cols="4" label="Dime una marca de ordenador">
+          <b-form-input v-model.trim="query" placeholder="... por ejemplo Acer" 
                         @keyup.enter="searchBlogs">
           </b-form-input>
         </b-form-group>
@@ -91,7 +91,9 @@
           blogId: '', //blog activado
           blogs:  [], //blogs de la búsqueda
           posts:  [], //posts del blog activado
-          post:   ''  //nuevo post
+          post:   '',  //nuevo post
+          products: [],
+          name: ''
         },
         computed: {
           showAlert() {
@@ -99,6 +101,31 @@
           }
         },
         methods:{
+          searchProducts(){
+            var self = this
+            var gQL = `query{searchProducts(marca: "${this.query}"){name, category, marca, capacidad, quantity}}`
+
+            fetch('/graphql?query=' + encodeURIComponent(gQL))
+            .then(function(r){return r.json()})
+            .then(function(json){
+              self.products = json.data.searchProducts
+            })
+            .catch(function(error){console.log(error)})
+          },
+          getProducts(name){
+            var self = this
+            
+            this.name = name
+
+            var gQL = `query{products{name, category, marca, capacidad, quantity}}`
+            console.log(gQL)
+            fetch('/graphql?query=' + encodeURIComponent(gQL))
+            .then(function(r){return r.json()})
+            .then(function(json){
+              self.posts = json.data.posts //TO BE COMPLETED : only title and content
+            })
+            .catch(function(error){console.log(error)})
+          },
           searchBlogs(){
             var self = this
             var gQL = `query{searchBlog(q:"${this.query}"){title creator{name}}}`

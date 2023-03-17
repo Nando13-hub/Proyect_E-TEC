@@ -27,6 +27,7 @@ const schema = buildSchema(`
     addBlog(title:String!,creator:ID!):Blog!
     addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
     addProduct(name:String!, category:String!, marca: String!, capacidad: Int!, quantity: Int!):Product
+    deleteProduct(name:String!):String
   }
 
   type User{
