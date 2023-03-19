@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
 
-    <title>BLOGS</title>
+    <title>E-Tec</title>
 
     <!-- Required Stylesheets -->
     <link
@@ -28,6 +28,37 @@
   <body>
     <!-- Our application root element -->
     <div id="app">
+      <div>
+        <b-navbar type="dark" variant="dark">
+            <b-navbar-brand href="#">E-Tec</b-navbar-brand>
+            
+            <b-navbar-nav align="center">
+                <b-nav-item active>Inicio</b-nav-item>
+                  <b-nav-item-dropdown
+                    id="my-nav-dropdown"
+                    text="Productos"
+                    toggle-class="nav-link-custom"
+                    right
+                  >
+                    <b-dropdown-item>Ordenadores</b-dropdown-item>
+                    <b-dropdown-item>Consolas</b-dropdown-item>
+                    <b-dropdown-item>Teléfonos</b-dropdown-item>
+                    <b-dropdown-divider></b-dropdown-divider>
+                  </b-nav-item-dropdown>
+                  <b-nav-item>Quiénenes somos</b-nav-item>
+            </b-navbar-nav>
+            <b-navbar-nav align="right">
+                <b-nav-item-dropdown right>
+                    <!-- Using 'button-content' slot -->
+                    <template #button-content>
+                      <em>User</em>
+                    </template>
+                    <b-dropdown-item href="#">Profile</b-dropdown-item>
+                    <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+                  </b-nav-item-dropdown>
+            </b-navbar-nav>
+        </b-navbar>
+    </div>
       <b-container>
         <b-jumbotron header="BLOGS" lead="Demo de consumo de servicios con Vue2 y BootstrapVue">
           <p>Para más información consulta:</p>
@@ -83,8 +114,8 @@
 
     <!-- Start running your app -->
     <script>
-      import Navbar from '/components/Navbar.vue';
-      Vue.component('Navbar', Navbar);
+      //import Navbar from '/components/Navbar.vue';
+      //Vue.component('Navbar', Navbar); -->
 
       window.app  = new Vue({
         el: '#app',
