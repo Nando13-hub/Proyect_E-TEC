@@ -83,6 +83,9 @@
 
     <!-- Start running your app -->
     <script>
+      import Navbar from '/components/Navbar.vue';
+      Vue.component('Navbar', Navbar);
+
       window.app  = new Vue({
         el: '#app',
         data: {

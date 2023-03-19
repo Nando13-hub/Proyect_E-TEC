@@ -20,13 +20,18 @@ const schema = buildSchema(`
     posts(blogId:ID!):[Post]
     searchPost(blogId:ID!, q:String!):[Post]
     products: [Product]
-    searchProducts(marca:String!):[Product]
+    searchProductsByName(name:String!):[Product]
+    searchProductsByCategory(category:String!):[Product]
+    searchProductsByMarca(marca:String!):[Product]
+    searchProductsByCapacidad(capacidad: Int!):[Product]
+    searchProductsByQuantity(quantity: Int!):[Product]
   }
   type Mutation {
     addUser(name:String!):User!
     addBlog(title:String!,creator:ID!):Blog!
     addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
     addProduct(name:String!, category:String!, marca: String!, capacidad: Int!, quantity: Int!):Product
+    addContract(name: String!, category: String!, marca: String!, capacidad: Int!, quantity: Int!):Contract
     deleteProduct(name:String!):String
   }
 
@@ -57,6 +62,14 @@ const schema = buildSchema(`
     marca: String,
     capacidad: Int,
     quantity: Int
+  }
+
+  type Contract{
+    name: String,
+    cantidad: String,
+    product: String,
+    user: String,
+    duracion: Int
   }
 `)
 
@@ -98,9 +111,25 @@ const rootValue = {
      
      apiVersion: () => DB.objects('Version'),
      products: () => DB.objects('Product'),
-     searchProducts: ({ marca }) => {
+     searchProductsByName: ({ name }) => {
+      name = name.toLowerCase()
+      return DB.objects('Product').filter(x => x.name.toLowerCase().includes(name))
+    },
+    searchProductsByCategory: ({ category }) => {
+      category = marca.toLowerCase()
+      return DB.objects('Product').filter(x => x.category.toLowerCase().includes(category))
+    },
+    searchProductsByMarca: ({ marca }) => {
       marca = marca.toLowerCase()
       return DB.objects('Product').filter(x => x.marca.toLowerCase().includes(marca))
+    },
+    searchProductsByCapacidad: ({ capacidad }) => {
+      capacidad = capacidad.toLowerCase()
+      return DB.objects('Product').filter(x => x.capacidad.toLowerCase().includes(capacidad))
+    },
+    searchProductsByQuantity: ({ quantity }) => {
+      quantity = quantity.toLowerCase()
+      return DB.objects('Product').filter(x => x.quantity.toLowerCase().includes(quantity))
     },
      addProduct: ({name, category, marca, capacidad, quantity}) => {
       let data = {

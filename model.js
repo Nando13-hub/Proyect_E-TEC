@@ -54,7 +54,15 @@ let ProductSchema = {
 }
 
 let ContractSchema = {
-  name: 'Contract'
+  name: 'Contract',
+  primaryKey: 'name',
+  properties:{
+    name: 'string',
+    cantidad: 'string',
+    product: 'string',
+    user: 'string',
+    duracion: 'int'
+  }
 }
 
 // // // MODULE EXPORTS
