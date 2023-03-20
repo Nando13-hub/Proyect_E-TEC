@@ -75,12 +75,12 @@
           </b-form-input>
         </b-form-group>
 
-      <div v-if="blogs.length>0">
+      <div v-if="products.length>0">
         <b-card>
        		<ul>
-        	   <p v-for="blog in blogs">
+        	   <p v-for="p in products">
                 <!-- <b-button @click="getPosts(blog.title)">{{blog.title}}</b-button> by {{blog.creator.name}} -->
-                <b-button @click="getProductsByMarca(products.marca)">{{products.marca}}</b-button>
+                <b-button @click="getProductsByMarca(products.marca)">{{p.marca}}</b-button>
              </p>
       		</ul>
         </b-card>
