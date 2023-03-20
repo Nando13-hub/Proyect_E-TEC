@@ -1,0 +1,60 @@
+{
+    "@context": "https://schema.org",
+    "@id": "WebAPI",
+    "@type": "WebAPI",
+    "name": "API de alquiler de dispositivos electrónicos",
+    "description": "Una API que permite alquilar dispositivos electrónicos, como smartphones y ordenadores portátiles",
+    "url": "https://api-alquiler-dispositivos.com",
+    "author": [
+      {
+        "@id": "Person",
+        "@type": "Person",
+        "name": "Fernando",
+        "url": "https://example.com/fernando"
+        },
+      {
+        "@id": "Person",
+        "@type": "Person",
+        "name": "Antonio",
+        "url": "https://example.com/antonio"
+        }
+    ]
+    ,
+    "provider": {
+      "@id": "Provider",
+      "@type": "Organization",
+      "name": "E-TEC S.A.",
+      "url": "https://e-tec.com"
+    },
+    "serviceType": "Alquiler de dispositivos electrónicos",
+    "serviceOutput": "Datos de los usuarios, productos y contratos en formato JSON",
+    "termsOfService": "https://api-alquiler-dispositivos.com/terms",
+    "documentation": "https://api-alquiler-dispositivos.com/docs",
+    "entities": [
+      {
+        "@id": "Person",
+        "@type": "Person",
+        "name": "Usuario",
+        
+        "url": "https://schema.org/Person",
+        "description": "Una persona que alquila uno o varios dispositivos electrónicos"
+      },
+      {
+        "@id": "Product",
+        "@type": "Product",
+        "name": "Product",
+        "category": "Category",
+        "brand": "Marca",
+        "url": "https://schema.org/Product",
+        "description": "Un dispositivo electrónico disponible para alquilar"
+      },
+      {
+        "@id": "Contract",
+        "@type": "Contract",
+        "name": "Contrato",
+        "url": "https://schema.org/Contract",
+        "description": "Un acuerdo entre un usuario y la empresa para el alquiler de un producto"
+      }
+    ]
+  }
+  
