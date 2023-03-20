@@ -58,25 +58,20 @@
                   </b-nav-item-dropdown>
             </b-navbar-nav>
         </b-navbar>
-    </div>
+      </div>
       <b-container>
-        <b-jumbotron header="BLOGS" lead="Demo de consumo de servicios con Vue2 y BootstrapVue">
-          <p>Para más información consulta:</p>
-          <b-btn variant="primary" href="https://bootstrap-vue.js.org/">¡ Quiero saber más de BootstrapVue !</b-btn>
-        </b-jumbotron>
-
         <b-form-group horizontal :label-cols="4" label="Dime tu nombre">
           <b-form-input v-model.trim="name"></b-form-input>
         </b-form-group>
 
         <b-alert variant="success" :show="showAlert">
            Bienvenido {{ name }}!
-           <b-button @click="" size="sm">Crear Usuario</b-button>
+           <b-button @click="addUser" size="sm">Crear Usuario</b-button>
         </b-alert>
       
         <b-form-group horizontal :label-cols="4" label="Dime una marca de ordenador">
           <b-form-input v-model.trim="query" placeholder="... por ejemplo Acer" 
-                        @keyup.enter="searchBlogs">
+                        @keyup.enter="searchProducts">
           </b-form-input>
         </b-form-group>
 
@@ -84,7 +79,8 @@
         <b-card>
        		<ul>
         	   <p v-for="blog in blogs">
-                <b-button @click="getPosts(blog.title)">{{blog.title}}</b-button> by {{blog.creator.name}}
+                <!-- <b-button @click="getPosts(blog.title)">{{blog.title}}</b-button> by {{blog.creator.name}} -->
+                <b-button @click="getProductsByMarca(products.marca)">{{products.marca}}</b-button>
              </p>
       		</ul>
         </b-card>
@@ -114,20 +110,19 @@
 
     <!-- Start running your app -->
     <script>
-      //import Navbar from '/components/Navbar.vue';
-      //Vue.component('Navbar', Navbar); -->
 
       window.app  = new Vue({
         el: '#app',
         data: {
           name:   '', //nombre de usuario (no se usa)
+          users: [],
           query:  '', //búsqueda
           blogId: '', //blog activado
           blogs:  [], //blogs de la búsqueda
           posts:  [], //posts del blog activado
           post:   '',  //nuevo post
-          products: [],
-          name: ''
+          productMarca:'',
+          products: []
         },
         computed: {
           showAlert() {
@@ -137,21 +132,22 @@
         methods:{
           searchProducts(){
             var self = this
-            var gQL = `query{searchProducts(marca: "${this.query}"){name, category, marca, capacidad, quantity}}`
-
+            var gQL = `query{searchProductsByMarca(marca: "${this.query}"){name, category, marca, capacidad, quantity}}`
+            console.log(gQL)
             fetch('/graphql?query=' + encodeURIComponent(gQL))
             .then(function(r){return r.json()})
             .then(function(json){
-              self.products = json.data.searchProducts
+              self.products = json.data.searchProductsByMarca
+              console.log(self.products)
             })
             .catch(function(error){console.log(error)})
           },
-          getProducts(name){
+          getProductsByMarca(productMarca){
             var self = this
             
-            this.name = name
+            this.productMarca = productMarca
 
-            var gQL = `query{products{name, category, marca, capacidad, quantity}}`
+            var gQL = `query{searchProductsByMarca(marca: "${this.productMarca}"){name, category, marca, capacidad, quantity}}`
             console.log(gQL)
             fetch('/graphql?query=' + encodeURIComponent(gQL))
             .then(function(r){return r.json()})
@@ -187,6 +183,18 @@
           },
           addPost(){
             //TO BE COMPLETED 
+          },
+          addUser(name){
+            var self = this
+            this.name = name
+            var gQL = `mutation{addUser(name: ${this.name}, passwd: "123"){name passwd}}`
+            
+            fetch('/graphql?query=' + encodeURIComponent(gQL))
+            .then(function(r){return r.json()})
+            .then(function(json){
+              self.addUser = json.data.addUser
+            })
+            .catch(function(error){console.log(error)})
           }
         },
         mounted(){

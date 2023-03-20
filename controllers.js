@@ -27,7 +27,7 @@ const schema = buildSchema(`
     searchProductsByQuantity(quantity: Int!):[Product]
   }
   type Mutation {
-    addUser(name:String!):User!
+    addUser(name:String!, passwd:String!):User!
     addBlog(title:String!,creator:ID!):Blog!
     addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
     addProduct(name:String!, category:String!, marca: String!, capacidad: Int!, quantity: Int!):Product
@@ -36,14 +36,15 @@ const schema = buildSchema(`
   }
 
   type User{
-	name: String
+    name: String
+    passwd: String
   }
 
   type Post{
-	title: String
-	content: String
-	author: User
-	blog: Blog
+    title: String
+    content: String
+    author: User
+    blog: Blog
   }
 
   type Blog{
@@ -141,9 +142,19 @@ const rootValue = {
       }
       DB.write( () => {post = DB.create('Product', data)})
       // SSE notification
+      sse.emitter.emit('new-product', data)
+      return data
+     },
+    addUser: ({name, passwd}) => {
+      let data = {
+        name: name,
+        passwd: passwd
+      }
+      DB.write( () => {post = DB.create('User', data)})
+      // SSE notification
       sse.emitter.emit('new-post', data)
       return data
-     }
+    }
 }
 
 exports.root   = rootValue
