@@ -1,14 +1,16 @@
 const { graphql, buildSchema } = require('graphql')
+const fs = require('fs')
 
 const model = require('./model') //Database
 
 const my_graph = require('./my-graph.json')
-
+console.log(JSON.stringify(my_graph))
 
 
 let DB
 model.getDB().then(db => {DB=db})
 
+const ObjectId = require('bson-objectid')
 
 const sse  = require('./utils/notifications') //Notifications
 sse.start()
@@ -20,9 +22,6 @@ const schema = buildSchema(`
     users: [User]
     blogs: [Blog]
     apiVersion: [Version]
-    searchBlog(q:String!):[Blog]
-    posts(blogId:ID!):[Post]
-    searchPost(blogId:ID!, q:String!):[Post]
     products: [Product]
     searchProductsByName(name:String!):[Product]
     searchProductsByCategory(category:String!):[Product]
@@ -32,48 +31,38 @@ const schema = buildSchema(`
   }
   type Mutation {
     addUser(name:String!, passwd:String!):User!
-    addBlog(title:String!,creator:ID!):Blog!
-    addPost(title:String!,content:String!,authorId:ID!,blogId:ID!):Post
     addProduct(name:String!, category:String!, marca: String!, capacidad: Int!, quantity: Int!):Product
     addContract(name: String!, category: String!, marca: String!, capacidad: Int!, quantity: Int!):Contract
     deleteProduct(name:String!):String
   }
 
   type User{
+    _id: ID
     name: String
     passwd: String
   }
 
-  type Post{
-    title: String
-    content: String
-    author: User
-    blog: Blog
-  }
-
-  type Blog{
-	creator: User
-	title: String
-  }
-
   type Version{
+    _id: ID,
     name: String
     version: String
   }
 
   type Product{
-    name: String,
-    category: String,
-    marca: String,
-    capacidad: Int,
+    _id: ID
+    name: String
+    category: String
+    marca: String
+    capacidad: Int
     quantity: Int
   }
 
   type Contract{
-    name: String,
-    cantidad: String,
-    product: String,
-    user: String,
+    _id: ID
+    name: String
+    cantidad: String
+    product: String
+    user: String
     duracion: Int
   }
 `)
@@ -82,40 +71,9 @@ const schema = buildSchema(`
 const rootValue = {
      hello : () => "Hello World!",
      users : () => DB.objects('User'),
-     blogs:  () => DB.objects('Blog'),
-     searchBlog: ({ q }) => {
-       q = q.toLowerCase()
-       return DB.objects('Blog').filter(x => x.title.toLowerCase().includes(q))
-     },
-     posts: ({ blogId }) => {
-       return DB.objects('Post').filter(x => x.blog.title == blogId)
-     },
-     addPost: ({title, content, authorId, blogId}) => {
-
-       let post = null
-       let blog = DB.objectForPrimaryKey('Blog', blogId)
-       let auth = DB.objectForPrimaryKey('User', authorId)
-       
-       if (blog && auth){
-          let data = {
-                       title: title,
-                       content: content,
-                       author: auth,
-                       blog: blog,
-                       timestamp: new Date()
-                      }
-
-          DB.write( () => { post = DB.create('Post', data) }) 
-
-          // SSE notification
-          sse.emitter.emit('new-post', data)
-       }
-       
-       return post
-     },
-     
      apiVersion: () => DB.objects('Version'),
      products: () => DB.objects('Product'),
+     contracts: () => DB.objects('Contract'),
      searchProductsByName: ({ name }) => {
       name = name.toLowerCase()
       return DB.objects('Product').filter(x => x.name.toLowerCase().includes(name))
@@ -138,6 +96,8 @@ const rootValue = {
     },
      addProduct: ({name, category, marca, capacidad, quantity}) => {
       let data = {
+        _id: ObjectId(),
+        _partition: model.partitionKey,
         name: name,
         category: category,
         marca: marca,
@@ -150,14 +110,17 @@ const rootValue = {
       return data
      },
     addUser: ({name, passwd}) => {
-      let data = {
-        name: name,
-        passwd: passwd
+      let data  = null
+      if ( name.length>0 && passwd.length>0){
+        data = {
+          _id: ObjectId(),
+          _partition: model.partitionKey,
+          name: name,
+          passwd: passwd
+        }
+        DB.write( () => {post = DB.create('User', data)})
       }
-      DB.write( () => {post = DB.create('User', data)})
-      // SSE notification
-      sse.emitter.emit('new-post', data)
-      return data
+      if (data) return data
     }
 }
 

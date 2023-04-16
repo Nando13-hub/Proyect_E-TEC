@@ -1,50 +1,38 @@
 const { version } = require('graphql')
 const Realm = require('realm')
 
+const ObjectId = require('bson-objectid')
+const app = new Realm.App({ id: "application_etec-wiime" })
+
+
 let UserSchema = {
    name: 'User',
-   primaryKey: 'name',
+   primaryKey: '_id',
    properties: {
+      _id: 'objectId',
+      _partition: 'string',
       name: 'string',
-      passwd: 'string',
-   }
-}
-
-let PostSchema = {
-  name: 'Post',
-  primaryKey: 'title',
-  properties: {
-    timestamp: 'date',
-    title: 'string', 
-    content: 'string',
-    author: 'User',
-    blog: 'Blog'
-  }
-}
-
-let BlogSchema = {
-  name : 'Blog',
-  primaryKey: 'title',
-  properties:{
-     title: 'string',
-     creator: 'User' //esto es una referencia a un usuario
+      passwd: 'string'
    }
 }
 
 let ApiVersionSchema = {
   name : 'Version',
-  primaryKey: 'name',
+  primaryKey: '_id',
   properties:{
+    _id: 'objectId',
+    _partition: 'string',
      name: 'string',
      version: 'string'
    }
 }
 
 let ProductSchema = {
-  //id
   name: 'Product',
-  primaryKey: 'name',
+  primaryKey: '_id',
   properties:{
+    _id: 'objectId',
+    _partition: 'string',
     name: 'string',
     category: 'string',
     marca: 'string',
@@ -55,8 +43,10 @@ let ProductSchema = {
 
 let ContractSchema = {
   name: 'Contract',
-  primaryKey: 'name',
+  primaryKey: '_id',
   properties:{
+    _id: 'objectId',
+    _partition: 'string',
     name: 'string',
     cantidad: 'string',
     product: 'string',
@@ -67,60 +57,85 @@ let ContractSchema = {
 
 // // // MODULE EXPORTS
 
-let config = {path: './data/blogs.realm', schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema, ProductSchema]}
+const myPartitionKey = "myAppPartition"
 
-exports.getDB = async () => await Realm.open(config)
+let sync = {user: app.currentUser, partitionValue: myPartitionKey}
+
+let config = {path: './data/blogs.realm', sync: sync, schema: [UserSchema, ApiVersionSchema, ProductSchema, ContractSchema]}
+
+exports.getDB = async () => {
+                              await app.logIn(new Realm.Credentials.anonymous())
+                              return await Realm.open(config)
+}
+
+exports.partitionKey = myPartitionKey
+
+exports.app = app
 
 // // // // // 
 
-if (process.argv[1] == __filename){ //TESTING PART
+  if (process.argv[1] == __filename){ //TESTING PART
 
-  if (process.argv.includes("--create")){ //crear la BD
-
-      Realm.deleteFile({path: './data/blogs.realm'}) //borramos base de datos si existe
-
-      let DB = new Realm({
-        path: './data/blogs.realm',
-        schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema, ProductSchema]
-      })
-     
-      DB.write(() => {
-        let user = DB.create('User', {name:'user0', passwd:'xxx'})
-        
-        let blog = DB.create('Blog', {title:'Todo Motos', creator: user})
-        
-        let post = DB.create('Post', {
-                                        title: 'prueba moto', 
-                                        blog:blog, 
-                                        content: 'esto es una prueba de motos',
-                                        creator: user, 
-                                        timestamp: new Date()})
-
-        let apiVersion = DB.create('Version', {name: 'version de la api', version: '0.0'})
-
-        let product = DB.create('Product', {
-          name: 'Acer 26',
-          category: 'Ordenador',
-          marca: 'Acer',
-          capacidad: 16,
-          quantity: 10
+    if (process.argv.includes("--create")){ //crear la BD
+  
+        Realm.deleteFile({path: './data/blogs.realm'}) //borramos base de datos si existe
+  
+        app.logIn(new Realm.Credentials.anonymous()).then(() => {
+  
+          let DB = new Realm({
+            path: './data/blogs.realm',
+            sync: sync,
+            schema: [ProductSchema, UserSchema, ContractSchema, ApiVersionSchema]
+          })
+         
+          DB.write(() => {
+            let user = DB.create('User', {_id: ObjectId(), 
+                                          _partition:myPartitionKey, 
+                                          name:'user0', 
+                                          passwd:'xxx'})
+           
+            let apiVersion = DB.create('Version', {
+                                                  _id: ObjectId(), 
+                                                  _partition:myPartitionKey, 
+                                                  name: 'version de la api', 
+                                                  version: '0.0'})
+    
+            let product = DB.create('Product', {
+              _id: ObjectId(),
+              _partition:myPartitionKey,
+              name: 'Acer 26',
+              category: 'Ordenador',
+              marca: 'Acer',
+              capacidad: 16,
+              quantity: 10
+            })
+    
+            let contract = DB.create('Contract', {
+              _id: ObjectId(),
+              _partition:myPartitionKey,
+              name: 'Contrato-1',
+              cantidad: '5',
+              product: 'Acer 26',
+              user: 'user0',
+              duracion: 13
+            })
+    
+            console.log('Inserted objects', user, apiVersion, product, contract)
+          })
+          DB.close()
+  
         })
-
-        console.log('Inserted objects', user, blog, post, apiVersion, product)
-      })
-      DB.close()
-
-  }
+        .catch(err => console.log(err))
+  
+    }
   else { //consultar la BD
 
-      Realm.open({ path: './data/blogs.realm' , schema: [PostSchema, UserSchema, BlogSchema, ApiVersionSchema, ProductSchema] }).then(DB => {
+      Realm.open({ path: './data/blogs.realm' , sync: sync, schema: [UserSchema, ApiVersionSchema, ProductSchema, ContractSchema] }).then(DB => {
         let users = DB.objects('User')
-        users.forEach(x => console.log(x.name))
-        let blog = DB.objectForPrimaryKey('Blog', 'Todo Motos')
-        let apiVersion = DB.objects('Version', '0.0')
+        users.forEach(x => console.log(x.name, x._id))
+        let apiVersion = DB.objects('Version')
         let product = DB.objects('Product')
-        if (blog)
-           console.log(blog.title, 'by', blog.creator.name)
+        let contract = DB.objects('Contract')
         DB.close()
       })
   }
