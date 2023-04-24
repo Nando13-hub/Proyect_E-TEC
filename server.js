@@ -3,6 +3,7 @@
 const express = require('express')
 const {graphqlHTTP} = require('express-graphql')
 const cors = require('cors')
+//const compression = require('compression')
 
 const {root, schema, sse} = require('./controllers')
 
@@ -20,6 +21,7 @@ app.use('/graphql', graphqlHTTP({
 app.use('/web',  express.static('public'))
 
 //Endpoint for SSE stream
+//app.use( compression() )
 app.use('/news', sse.eventStream)
 
 app.listen(9000, () => console.log('Listening on 9000'))

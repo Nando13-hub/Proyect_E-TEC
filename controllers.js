@@ -20,7 +20,6 @@ const schema = buildSchema(`
   type Query {
     hello: String
     users: [User]
-    blogs: [Blog]
     apiVersion: [Version]
     products: [Product]
     searchProductsByName(name:String!):[Product]

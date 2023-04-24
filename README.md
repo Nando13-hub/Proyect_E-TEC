@@ -44,11 +44,10 @@ Usuario: etec
 Password: al386122.
 
 ## APIKey
+https://eu-central-1.aws.data.mongodb-api.com/app/data-ljchg/endpoint/data/v1
 etec_key
 iKPGFys5rUiOxFxpW3JOx7dwqgCLOfvKSEIQXkb9T3lhUb6BC3dcmM9RaemX0Gmc
 
-app_id: application_etec-wiime
-
-
+## Nombre de la base de datos
 etec_db
-
+app_id: application_etec-wiime
