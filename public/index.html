@@ -68,10 +68,14 @@
            Bienvenido {{ name }}!
            <b-button @click="addUser" size="sm">Crear Usuario</b-button>
         </b-alert>
+
+        <b-form-group horizontal :label-cols="4" label="Ingrese el nombre del nuevo producto">
+          <b-form-input v-model.trim="name"></b-form-input>
+        </b-form-group>
       
-        <b-form-group horizontal :label-cols="4" label="Dime una marca de ordenador">
+        <b-form-group horizontal :label-cols="2" label="Buscador por marca:">
           <b-form-input v-model.trim="query" placeholder="... por ejemplo Acer" 
-                        @keyup.enter="searchProducts">
+                        @keyup.enter="searchProductsByMarca">
           </b-form-input>
         </b-form-group>
 
@@ -130,7 +134,19 @@
           }
         },
         methods:{
-          searchProducts(){
+          searchProductsByMarca(){
+            var self = this
+            var gQL = `query{searchProductsByMarca(marca: "${this.query}"){name, category, marca, capacidad, quantity}}`
+            console.log(gQL)
+            fetch('/graphql?query=' + encodeURIComponent(gQL))
+            .then(function(r){return r.json()})
+            .then(function(json){
+              self.products = json.data.searchProductsByMarca
+              console.log(self.products)
+            })
+            .catch(function(error){console.log(error)})
+          },
+          searchProductsByCategory(){
             var self = this
             var gQL = `query{searchProductsByMarca(marca: "${this.query}"){name, category, marca, capacidad, quantity}}`
             console.log(gQL)
